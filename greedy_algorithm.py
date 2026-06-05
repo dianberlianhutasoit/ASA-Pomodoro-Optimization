@@ -1,14 +1,24 @@
-# Greedy Algorithm untuk memilih aktivitas berdasarkan rasio manfaat.
+# Greedy Algorithm untuk memilih aktivitas berdasarkan rasio efisiensi.
 
 def run_greedy(data, max_duration, max_focus):
+    alpha = 1
+    beta = 1
+
     items = []
 
     for item in data:
-        copied = item.copy()
-        copied["ratio"] = copied["benefit"] / (copied["duration"] + copied["focus"])
-        items.append(copied)
+        duration_ratio = item["duration"] / max_duration
+        focus_ratio = item["focus"] / max_focus
 
-    items.sort(key=lambda x: x["ratio"], reverse=True)
+        ratio = item["benefit"] / (
+            alpha * duration_ratio + beta * focus_ratio
+        )
+
+        new_item = item.copy()
+        new_item["ratio"] = ratio
+        items.append(new_item)
+
+    items = sorted(items, key=lambda x: x["ratio"], reverse=True)
 
     selected = []
     total_duration = 0
@@ -16,10 +26,13 @@ def run_greedy(data, max_duration, max_focus):
     total_benefit = 0
 
     for item in items:
-        if total_duration + item["duration"] <= max_duration and total_focus + item["focus"] <= max_focus:
+        new_duration = total_duration + item["duration"]
+        new_focus = total_focus + item["focus"]
+
+        if new_duration <= max_duration and new_focus <= max_focus:
             selected.append(item)
-            total_duration += item["duration"]
-            total_focus += item["focus"]
+            total_duration = new_duration
+            total_focus = new_focus
             total_benefit += item["benefit"]
 
     return {
